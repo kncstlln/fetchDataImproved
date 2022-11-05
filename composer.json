@@ -1,0 +1,7 @@
+{
+    "require": {
+        "mustache/mustache": "^2.14",
+        "mongodb/mongodb": "^1.12",
+        "vlucas/phpdotenv": "^5.5"
+    }
+}
