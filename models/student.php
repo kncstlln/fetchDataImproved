@@ -1,44 +1,45 @@
 <?php
 
 namespace Models;
-use \PDO;
 
 class Student
 {
-	public $student_id;
-    public $first_name;
-    public $last_name;
+	public $studentId;
+    public $firstName;
+    public $lastName;
     public $birthdate;
 	public $address;
     public $program;
-    public $contact_number;
-    public $emergency_contact;
+    public $contactNumber;
+    public $emergencyContact;
+	
    
 
-    public function __construct($student_id, $first_name, $last_name, $birthdate, $address, $program, $contact_number, $emergency_contact)
+    public function __construct($studentId, $firstName, $lastName, $birthdate, $address, $program, $contactNumber, $emergencyContact)
     {
-        $this->student_id = $student_id;
-        $this->first_name = $first_name;
-        $this->last_name = $last_name;
+        $this->studentId = $studentId;
+        $this->firstName = $firstName;
+        $this->lastName = $lastName;
         $this->birthdate = $birthdate;
 		$this->address = $address;
 		$this->program = $program;
-		$this->contact_number = $contact_number;
-        $this->emergency_contact = $emergency_contact;
+		$this->contactNumber = $contactNumber;
+        $this->emergencyContact = $emergencyContact;
     }
+
     public function getStudentId()
 	{
-		return $this->student_id;
+		return $this->studentId;
 	}
 
 	public function getFirstName()
 	{
-		return $this->first_name;
+		return $this->firstName;
 	}
 
 	public function getLastName()
 	{
-		return $this->last_name;
+		return $this->lastName;
 	}
 
 	public function getBirthdate()
@@ -55,29 +56,33 @@ class Student
     }
     public function getContactNumber()
 	{
-		return $this->contact_number;
+		return $this->contactNumber;
     }
     public function getEmergencyContact()
 	{
-		return $this->emergency_contact;
+		return $this->emergencyContact;
     }
     public function setConnection($connection)
 	{
-		$this->connection = $connection;
+		return $this->connection = $connection;
+	}
+	public function getAll()
+	{
+		$students = $this->connection->find();
+		return $students;
 	}
     public function addStudent()
 	{
 		try {
-			$sql = "INSERT INTO students SET first_name=:first_name, last_name=:last_name, email=:email, student_number=:student_number, contact=:contact, program=:program";
-			$statement = $this->connection->prepare($sql);
-
-			return $statement->execute([
-				':first_name' => $this->getFirstName(),
-				':last_name' => $this->getLastName(),
-                ':email'=> $this->getEmail(),
-				':student_number' => $this->getStudentNumber(),
-                ':contact'=> $this->getContact(),
-                ':program'=> $this->getProgram()
+			$students = $this->connection->insertOne([
+				'studentId' => $this->getStudentId(),
+				'firstName' => $this->getFirstName(),
+				'lastName' => $this->getLastName(),
+                'birthdate'=> $this->getBirthdate(),
+				'address' => $this->getAddress(),
+                'program'=> $this->getProgram(),
+                'contactNumber'=> $this->getContactNumber(),
+				'emergencyContact'=> $this->getEmergencyContact()
 			]);
 
 		} catch (Exception $e) {
@@ -87,82 +92,41 @@ class Student
 	public function getById($id)
 	{
 		try {
-			$sql = 'SELECT * FROM students WHERE id=:id';
-			$statement = $this->connection->prepare($sql);
-			$statement->execute([
-				':id' => $id
-			]);
-
-			$row = $statement->fetch();
-
-			$this->id = $row['id'];
-			$this->first_name = $row['first_name'];
-			$this->last_name = $row['last_name'];
-			$this->email = $row['email'];
-			$this->student_number= $row['student_number'];
-			$this->contact = $row['contact'];
-			$this->program = $row['program'];
+			$students = $this->connection->findOne(['_id' => $id]);
+			return $students;
 
 		} catch (Exception $e) {
 			error_log($e->getMessage());
 		}
 	}
-    public function updateStudent($first_name, $last_name, $email, $student_number, $contact, $program)
+    public function updateStudent($id, $studentId, $firstName, $lastName, $birthdate, $address, $program, $contactNumber, $emergencyContact)
 	{
 		try {
-			$sql = 'UPDATE students SET first_name=?, last_name=?, email=? , student_number=?, contact=?, program=? WHERE id = ?';
-			$statement = $this->connection->prepare($sql);
-			$statement->execute([
-				$first_name,
-                $last_name,
-				$email,
-				$student_number,
-				$contact,
-				$program,
-                $this->getID()
-
-			]);
+			$students = $this->connection->updateOne(['_id' => $id],
+			['$set'=>
+			[
+			'studentId' => $studentId,
+			'firstName' => $firstName,
+			'lastName' => $lastName,
+			'birthdate'=> $birthdate,
+			'address' => $address,
+			'program'=> $program,
+			'contactNumber'=> $contactNumber,
+			'emergencyContact'=> $emergencyContact
+			]]);
 			
 		} catch (Exception $e) {
 			error_log($e->getMessage());
 		}
         
 	}
-    public function delete()
+    public function delete($id)
 	{
 		try {
-			$sql = 'DELETE FROM students WHERE id=?';
-			$statement = $this->connection->prepare($sql);
-			$statement->execute([
-				$this->getId()
-			]);
+			$students = $this->connection->findOneAndDelete(['_id' => $id]);
+			return $students;
 		} catch (Exception $e) {
 			error_log($e->getMessage());
 		}
 	}
-
-	public function getAll()
-	{
-		try {
-			$sql = 
-			$data = $this->connection->query($sql)->fetchAll();
-			return $data;
-		} catch (Exception $e) {
-			error_log($e->getMessage());
-		}
-	}
-	public function viewClass($id)
-{
-        try {
-            $sql = "SELECT * FROM students INNER JOIN classes_rosters ON students.student_number=classes_rosters.student_number INNER JOIN classes ON classes_rosters.class_code=classes.code WHERE students.id=:id";
-            $statement = $this->connection->prepare($sql);
-            $statement->execute([
-                ':id' => $id
-            ]);
-            return $statement->fetchAll();
-        } catch (Exception $e) {
-            error_log($e->getMessage());
-        }
-    }
-
 }

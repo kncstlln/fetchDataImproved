@@ -1,4 +1,9 @@
 {
+    "autoload": {
+        "psr-4":{"Models\\": "models/"
+    }
+    },
+    
     "require": {
         "mustache/mustache": "^2.14",
         "mongodb/mongodb": "^1.12",
